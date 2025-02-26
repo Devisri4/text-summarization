@@ -1,0 +1,15 @@
+Original Text:
+ 
+Data analytics involves examining data sets to draw conclusions. It helps businesses make informed decisions. 
+It is used in various industries, including finance, healthcare, and marketing. The process includes data cleaning, 
+transformation, and visualization.
+
+
+Extractive Summary:
+ It is used in various industries, including finance, healthcare, and marketing. The process includes data cleaning, transformation, and visualization.
+
+Abstractive Summary:
+  Data analytics involves examining data sets to draw conclusions . It helps businesses make informed decisions . The process includes data cleaning, transformation, and visualization .
+
+ROUGE Score:
+ [{'rouge-1': {'r': 0.4090909090909091, 'p': 0.5, 'f': 0.44999999505}, 'rouge-2': {'r': 0.3181818181818182, 'p': 0.3888888888888889, 'f': 0.34999999505000007}, 'rouge-l': {'r': 0.4090909090909091, 'p': 0.5, 'f': 0.44999999505}}]
