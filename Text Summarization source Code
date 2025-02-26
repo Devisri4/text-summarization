@@ -1,0 +1,92 @@
+import nltk
+import matplotlib.pyplot as plt
+import subprocess
+
+# Install missing dependencies
+try:
+    from sumy.parsers.plaintext import PlaintextParser
+    from sumy.nlp.tokenizers import Tokenizer
+    from sumy.summarizers.lsa import LsaSummarizer
+except ModuleNotFoundError:
+    subprocess.check_call(["pip", "install", "sumy"])
+    from sumy.parsers.plaintext import PlaintextParser
+    from sumy.nlp.tokenizers import Tokenizer
+    from sumy.summarizers.lsa import LsaSummarizer
+
+try:
+    from transformers import pipeline
+except ModuleNotFoundError:
+    subprocess.check_call(["pip", "install", "transformers"])
+    from transformers import pipeline
+
+try:
+    from wordcloud import WordCloud
+except ModuleNotFoundError:
+    subprocess.check_call(["pip", "install", "wordcloud"])
+    from wordcloud import WordCloud
+
+try:
+    from rouge import Rouge
+except ModuleNotFoundError:
+    subprocess.check_call(["pip", "install", "rouge"])
+    from rouge import Rouge
+
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('punkt_tab') # Added this line to download punkt_tab
+
+# Sample text
+txt = """
+Data analytics involves examining data sets to draw conclusions. It helps businesses make informed decisions. 
+It is used in various industries, including finance, healthcare, and marketing. The process includes data cleaning, 
+transformation, and visualization.
+"""
+
+# Preprocessing
+def preprocess(text):
+    tokens = word_tokenize(text.lower())
+    stop_words = set(stopwords.words('english'))
+    lemmatizer = WordNetLemmatizer()
+    clean_tokens = [lemmatizer.lemmatize(word) for word in tokens if word.isalnum() and word not in stop_words]
+    return ' '.join(clean_tokens)
+
+preprocessed_text = preprocess(txt)
+
+# Extractive Summarization using LSA
+def extractive_summary(text, num_sentences=2):
+    parser = PlaintextParser.from_string(text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, num_sentences)
+    return ' '.join(str(sentence) for sentence in summary)
+
+summary_extractive = extractive_summary(txt)
+
+# Abstractive Summarization using T5 Transformer
+summarizer = pipeline("summarization")
+summary_abstractive = summarizer(txt, max_length=50, min_length=20, do_sample=False)[0]['summary_text']
+
+# Generate WordCloud
+def generate_wordcloud(text):
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+generate_wordcloud(preprocessed_text)
+
+# Evaluate with ROUGE
+rouge = Rouge()
+rouge_score = rouge.get_scores(summary_extractive, summary_abstractive)
+
+# Display Results
+print("Original Text:\n", txt)
+print("\nExtractive Summary:\n", summary_extractive)
+print("\nAbstractive Summary:\n", summary_abstractive)
+print("\nROUGE Score:\n", rouge_score)
